@@ -1,0 +1,53 @@
+@tailwind base;
+
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #005d32;
+  --primary-light: #f3f9f6;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* App-like Page Transitions */
+.page-fade-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms ease-out;
+}
+
+/* Haptic Feedback Simulation */
+.btn-haptic:active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease;
+}
+
+/* Hide Scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom Selection Color */
+::selection {
+  background: var(--primary);
+  color: white;
+}

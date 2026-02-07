@@ -1,0 +1,13 @@
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
+import AuthForm from '@/components/AuthForm';
+
+export default async function SignupPage() {
+    const session = await auth();
+
+    if (session) {
+        redirect('/account');
+    }
+
+    return <AuthForm type="signup" />;
+}
