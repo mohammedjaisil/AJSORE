@@ -2,8 +2,9 @@
 
 import { supabase } from '@/lib/supabase';
 import { PRODUCTS } from '@/lib/constants';
+import { Product } from '@/types';
 
-function mapProduct(item: any) {
+function mapProduct(item: any): Product {
     return {
         id: item.id,
         name: item.name,
@@ -23,7 +24,7 @@ function mapProduct(item: any) {
     };
 }
 
-export async function getProducts() {
+export async function getProducts(): Promise<Product[]> {
     try {
         const { data, error } = await supabase.from('products').select('*');
         if (error) throw error;
@@ -36,7 +37,7 @@ export async function getProducts() {
     }
 }
 
-export async function getProductById(id: number | string) {
+export async function getProductById(id: number | string): Promise<Product | undefined> {
     try {
         const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
         if (error) {
