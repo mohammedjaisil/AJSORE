@@ -130,18 +130,18 @@ const ProductDetailsContent: React.FC<ProductDetailsContentProps> = ({ product, 
                     </div>
 
                     <div className="space-y-6">
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <div className="flex items-center bg-gray-50 border border-gray-100 rounded-full h-16 px-4">
-                                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-12 h-12 flex items-center justify-center text-2xl font-black text-gray-400 hover:text-[#005d32] transition-colors">-</button>
-                                <span className="w-12 text-center font-black text-xl">{quantity}</span>
-                                <button onClick={() => setQuantity(q => q + 1)} className="w-12 h-12 flex items-center justify-center text-2xl font-black text-gray-400 hover:text-[#005d32] transition-colors">+</button>
+                        <div className="flex flex-row gap-3 sm:gap-4">
+                            <div className="flex items-center bg-gray-50 border border-gray-100 rounded-full h-14 sm:h-16 px-3 sm:px-4 w-36 sm:w-auto shrink-0">
+                                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-xl sm:text-2xl font-black text-gray-400 hover:text-[#005d32] transition-colors">-</button>
+                                <span className="w-12 sm:w-14 text-center font-black text-lg sm:text-xl">{quantity}</span>
+                                <button onClick={() => setQuantity(q => q + 1)} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-xl sm:text-2xl font-black text-gray-400 hover:text-[#005d32] transition-colors">+</button>
                             </div>
                             <button
                                 onClick={() => !isOutOfStock && addToCart(product, quantity, selectedColor)}
                                 disabled={isOutOfStock}
-                                className={`flex-1 h-16 rounded-full font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-2xl ${isOutOfStock ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#005d32] text-white hover:bg-[#004a28] shadow-[#005d32]/30'}`}
+                                className={`flex-1 h-14 sm:h-16 rounded-full font-black text-base sm:text-xs uppercase tracking-wider sm:tracking-[0.2em] transition-all transform active:scale-95 shadow-2xl ${isOutOfStock ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#005d32] text-white hover:bg-[#004a28] shadow-[#005d32]/30'}`}
                             >
-                                {isOutOfStock ? 'Decommissioned' : 'Secure This Drop'}
+                                {isOutOfStock ? 'Out of Stock' : 'Add to Bag'}
                             </button>
                         </div>
                     </div>

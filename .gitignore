@@ -1,12 +1,13 @@
-node_modules
+# Next.js
 .next
+.next/cache
+out
+
+# Dependencies
+node_modules
+
+# Env
 .env
 .env.local
 .env.production
 .env.development
-
-# Supabase
-supabase/.env
-
-# OS
-.DS_Store

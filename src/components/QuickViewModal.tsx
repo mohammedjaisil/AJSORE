@@ -98,31 +98,29 @@ const QuickViewModal: React.FC = () => {
                     <div className="space-y-6">
                         {!isOutOfStock ? (
                             <>
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-gray-100 flex items-center rounded-full px-4 py-2 border">
-                                        <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-2 text-xl">-</button>
-                                        <span className="w-8 text-center font-bold">{quantity}</span>
-                                        <button onClick={() => setQuantity(q => q + 1)} className="p-2 text-xl">+</button>
+                                <div className="flex flex-row items-center gap-3 sm:gap-4">
+                                    <div className="bg-gray-100 flex items-center rounded-full px-4 py-2.5 sm:px-5 sm:py-3 border shrink-0">
+                                        <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-2 sm:p-2.5 text-xl sm:text-2xl font-bold">-</button>
+                                        <span className="w-10 sm:w-12 text-center font-bold text-lg sm:text-xl">{quantity}</span>
+                                        <button onClick={() => setQuantity(q => q + 1)} className="p-2 sm:p-2.5 text-xl sm:text-2xl font-bold">+</button>
                                     </div>
-                                    <span className="text-xs text-gray-400">Only {quickViewProduct.stock} items left!</span>
+                                    <span className="text-xs text-gray-400 hidden sm:block">Only {quickViewProduct.stock} items left!</span>
                                 </div>
 
-                                <div className="flex gap-4">
+                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                     <button
                                         onClick={() => {
                                             addToCart(quickViewProduct, quantity);
                                             addToast(`${quickViewProduct.name} added to bag!`, "success");
                                             setQuickViewProduct(null);
                                         }}
-                                        className="flex-1 bg-[#005d32] text-white py-4 rounded-full font-bold hover:bg-[#004a28] transition-all transform active:scale-95 shadow-lg shadow-[#005d32]/20"
-                                    >
-                                        Add to Cart
+                                        className="flex-1 bg-[#005d32] text-white py-4 sm:py-4 rounded-full font-bold text-base sm:text-base hover:bg-[#004a28] transition-all transform active:scale-95 shadow-lg shadow-[#005d32]/20">
+                                        Add to Bag
                                     </button>
                                     <Link
                                         href={`/product/${quickViewProduct.id}`}
                                         onClick={() => setQuickViewProduct(null)}
-                                        className="flex-1 border-2 border-[#005d32] text-[#005d32] text-center py-4 rounded-full font-bold hover:bg-[#005d32]/5 transition-all"
-                                    >
+                                        className="flex-1 border-2 border-[#005d32] text-[#005d32] text-center py-4 sm:py-4 rounded-full font-bold text-base sm:text-base hover:bg-[#005d32]/5 transition-all">
                                         View Details
                                     </Link>
                                 </div>
