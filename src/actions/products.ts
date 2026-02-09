@@ -19,6 +19,7 @@ function mapProduct(item: any) {
         features: item.features,
         colors: item.colors,
         isFeatured: item.is_featured,
+        type: item.type || 'SIMPLE',
     };
 }
 

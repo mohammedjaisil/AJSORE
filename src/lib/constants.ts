@@ -28,7 +28,8 @@ export const PRODUCTS: Product[] = [
         category: 'Headphone',
         rating: 4.9,
         reviews: 1240,
-        features: ['Active Noise Cancellation', 'IPX8 Waterproof', '40h Battery', 'Touch Control']
+        features: ['Active Noise Cancellation', 'IPX8 Waterproof', '40h Battery', 'Touch Control'],
+        type: 'SIMPLE'
     },
     {
         id: '2',
@@ -41,7 +42,8 @@ export const PRODUCTS: Product[] = [
         category: 'Laptop',
         rating: 5.0,
         reviews: 89,
-        features: ['Retina Display', '16GB RAM', '1TB SSD', 'M2 Optimized']
+        features: ['Retina Display', '16GB RAM', '1TB SSD', 'M2 Optimized'],
+        type: 'SIMPLE'
     },
     {
         id: '3',
@@ -53,7 +55,8 @@ export const PRODUCTS: Product[] = [
         category: 'Gadget',
         rating: 4.7,
         reviews: 562,
-        features: ['360-Degree Sound', 'Siri Integrated', 'HomeKit Ready']
+        features: ['360-Degree Sound', 'Siri Integrated', 'HomeKit Ready'],
+        type: 'SIMPLE'
     },
     {
         id: '4',
@@ -66,7 +69,8 @@ export const PRODUCTS: Product[] = [
         category: 'Gadget',
         rating: 4.8,
         reviews: 210,
-        features: ['RGB Lighting', 'Hotswappable', 'Long Battery Life']
+        features: ['RGB Lighting', 'Hotswappable', 'Long Battery Life'],
+        type: 'SIMPLE'
     },
     {
         id: '5',
@@ -78,7 +82,8 @@ export const PRODUCTS: Product[] = [
         category: 'Headphone',
         rating: 4.6,
         reviews: 95,
-        features: ['Hi-Res Audio', 'Wired/Wireless', 'Foldable']
+        features: ['Hi-Res Audio', 'Wired/Wireless', 'Foldable'],
+        type: 'SIMPLE'
     },
     {
         id: '6',
@@ -91,7 +96,8 @@ export const PRODUCTS: Product[] = [
         category: 'Gadget',
         rating: 4.2,
         reviews: 45,
-        features: ['AR HUD', 'Bluetooth Calls', 'Photo Capture']
+        features: ['AR HUD', 'Bluetooth Calls', 'Photo Capture'],
+        type: 'SIMPLE'
     },
     {
         id: '7',
@@ -103,7 +109,8 @@ export const PRODUCTS: Product[] = [
         category: 'Gadget',
         rating: 4.9,
         reviews: 231,
-        features: ['OLED Screen', 'Stylus Support', 'Fast Charging']
+        features: ['OLED Screen', 'Stylus Support', 'Fast Charging'],
+        type: 'SIMPLE'
     },
     {
         id: '8',
@@ -116,7 +123,8 @@ export const PRODUCTS: Product[] = [
         category: 'Gadget',
         rating: 4.8,
         reviews: 780,
-        features: ['25K DPI Sensor', '6 Buttons', 'Featherlight']
+        features: ['25K DPI Sensor', '6 Buttons', 'Featherlight'],
+        type: 'SIMPLE'
     },
     {
         id: '9',
@@ -128,7 +136,8 @@ export const PRODUCTS: Product[] = [
         category: 'Gadget',
         rating: 5.0,
         reviews: 12,
-        features: ['3D Audio', 'Bluetooth 5.2', 'Ambient Light']
+        features: ['3D Audio', 'Bluetooth 5.2', 'Ambient Light'],
+        type: 'SIMPLE'
     },
     {
         id: '10',
@@ -141,7 +150,8 @@ export const PRODUCTS: Product[] = [
         category: 'Gadget',
         rating: 4.5,
         reviews: 3200,
-        features: ['Heart Rate', 'Sleep Tracking', 'Waterproof']
+        features: ['Heart Rate', 'Sleep Tracking', 'Waterproof'],
+        type: 'SIMPLE'
     }
 ];
 
