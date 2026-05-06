@@ -191,6 +191,17 @@ function SidebarNav({ pathname }: { pathname: string }) {
     );
 }
 
+interface NavItemProps {
+    item: {
+        name: string;
+        href: string;
+        icon: React.ElementType | any;
+        exact?: boolean;
+        sub?: { name: string; href: string }[];
+    };
+    pathname: string;
+}
+
 function NavItem({ item, pathname, searchParams }: NavItemProps & { searchParams: URLSearchParams }) {
     const fullCurrent = pathname + (searchParams.toString() ? '?' + searchParams.toString() : '');
     

@@ -70,6 +70,10 @@ function SubmitButton({ text }: { text: string }) {
     );
 }
 
+interface AuthFormProps {
+    type: 'login' | 'signup' | 'forgot-password';
+}
+
 const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
     const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null);
     const [activeSocialModal, setActiveSocialModal] = useState<'Google' | 'Apple' | null>(null);
