@@ -1,11 +1,14 @@
 
 export interface Review {
     id: string;
-    userName: string;
+    user_name: string;
+    user_email: string;
+    product_id: string;
     rating: number;
     comment: string;
-    date: string;
-    isVerified: boolean;
+    is_verified: boolean;
+    admin_reply?: string;
+    created_at: string;
     avatar?: string;
 }
 
@@ -36,31 +39,59 @@ export interface Product {
     description: string;
     price: number;
     oldPrice?: number;
+    old_price?: number;
     stock: number;
     image: string;
     secondaryImage?: string;
+    secondary_image?: string;
     category: string;
+    category_id?: string;
+    category_name?: string;
     rating: number;
     reviews: number;
+    reviews_count?: number;
     colors?: string[];
     features?: string[];
     isFeatured?: boolean;
+    is_featured?: boolean;
     detailedReviews?: Review[];
     type: 'SIMPLE' | 'VARIABLE';
     variations?: ProductVariation[];
+    tags?: string[];
+    sku?: string;
+    meta_title?: string;
+    meta_description?: string;
+    slug?: string;
+    supplier_price?: number;
+    cost_price?: number;
+    supplier_id?: string;
+    supplier_name?: string;
+    supplier_link?: string;
+    shipping_cost?: number;
+    status?: string;
 }
 
 export interface CartItem extends Product {
     quantity: number;
     selectedColor?: string;
+    selectedSize?: string;
 }
 
 export interface Order {
     id: string;
-    date: string;
-    items: CartItem[];
+    user_id: string;
+    user_name: string;
+    user_email: string;
     total: number;
-    status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+    status: 'Pending' | 'Paid' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'Refunded';
+    shipping_address: string;
+    tracking_number?: string;
+    courier?: string;
+    shipped_at?: string;
+    delivered_at?: string;
+    created_at: string;
+    updated_at: string;
+    items?: CartItem[];
 }
 
 export interface BlogPost {
@@ -79,6 +110,7 @@ export interface User {
     role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
     addresses: Address[];
     payments: PaymentMethod[];
+    created_at: string;
 }
 
 export interface Address {
@@ -101,4 +133,16 @@ export interface Currency {
     rate: number;
     flag: string;
     name: string;
+}
+
+export interface Coupon {
+    id: string;
+    code: string;
+    type: 'PERCENT' | 'FIXED';
+    value: number;
+    expiry_date?: string;
+    usage_limit?: number;
+    used_count: number;
+    is_active: boolean;
+    created_at: string;
 }

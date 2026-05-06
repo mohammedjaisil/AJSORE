@@ -2,18 +2,14 @@
 import { Product, BlogPost, Currency } from '@/types';
 
 export const THEME_COLOR = {
-    primary: '#005d32',
-    primaryHover: '#004a28',
-    secondary: '#f3f9f6'
+    primary: '#000000',
+    primaryHover: '#18181b',
+    secondary: '#f4f4f5'
 };
 
 export const CURRENCIES: Currency[] = [
-    { code: 'USD', symbol: '$', rate: 1, flag: '🇺🇸', name: 'United States' },
-    { code: 'EUR', symbol: '€', rate: 0.92, flag: '🇪🇺', name: 'European Union' },
-    { code: 'GBP', symbol: '£', rate: 0.79, flag: '🇬🇧', name: 'United Kingdom' },
     { code: 'INR', symbol: '₹', rate: 83.50, flag: '🇮🇳', name: 'India' },
-    { code: 'JPY', symbol: '¥', rate: 150.25, flag: '🇯🇵', name: 'Japan' },
-    { code: 'AED', symbol: 'د.إ', rate: 3.67, flag: '🇦🇪', name: 'United Arab Emirates' },
+    { code: 'USD', symbol: '$', rate: 1, flag: '🇺🇸', name: 'United States' },
 ];
 
 export const PRODUCTS: Product[] = [
@@ -60,7 +56,7 @@ export const PRODUCTS: Product[] = [
     },
     {
         id: '4',
-        name: 'AJ Wireless Mechanical Keyboard',
+        name: 'buykko Wireless Mechanical Keyboard',
         description: 'Satisfying tactile feedback with low-latency 2.4GHz wireless connection.',
         price: 89.00,
         oldPrice: 110.00,
@@ -156,9 +152,9 @@ export const PRODUCTS: Product[] = [
 ];
 
 export const CATEGORIES = [
-    { name: 'Headphone', count: '2 Item Available', icon: '🎧', bgColor: '#dcf0ea' },
-    { name: 'Laptop', count: '1 Item Available', icon: '💻', bgColor: '#e3f2fd' },
-    { name: 'Gadget', count: '7 Item Available', icon: '🔋', bgColor: '#f3e5f5' }
+    { name: 'Headphone', count: '2 Item Available', icon: '🎧', bgColor: '#f4f4f5' },
+    { name: 'Laptop', count: '1 Item Available', icon: '💻', bgColor: '#f8f9fa' },
+    { name: 'Gadget', count: '7 Item Available', icon: '🔋', bgColor: '#ffffff' }
 ];
 
 export const BLOG_POSTS: BlogPost[] = [

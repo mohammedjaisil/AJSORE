@@ -89,181 +89,197 @@ export default function CustomersTable({ initialCustomers, currentUserRole }: Cu
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h3 className="text-xl font-bold text-gray-900">User Management</h3>
+        <div className="space-y-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 pb-6 border-b border-slate-50">
+                <div className="space-y-1">
+                    <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight leading-none">Customer List</h3>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.3em]">Manage user accounts and roles</p>
+                </div>
                 <button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className="bg-[#005d32] text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#004a28] transition-all shadow-lg shadow-[#005d32]/20 pr-4 flex items-center gap-2"
+                    className="bg-[#0f172a] text-white px-8 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-slate-900/20 hover:bg-slate-800 transition-all flex items-center gap-3 active:scale-95 border border-white/5"
                 >
-                    {showAddForm ? 'Close Form' : '+ Add New User'}
+                    {showAddForm ? 'Cancel' : '+ Add New Customer'}
                 </button>
             </div>
 
             {showAddForm && (
-                <div className="bg-[#f3f9f6] p-8 rounded-[2rem] border border-[#005d32]/10 animate-in fade-in slide-in-from-top-4 duration-500">
-                    <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Name</label>
+                <div className="bg-slate-50/50 p-10 rounded-[3rem] border border-slate-100 animate-in fade-in slide-in-from-top-6 duration-700 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[60px] pointer-events-none" />
+                    <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 items-end relative z-10">
+                        <div className="space-y-3">
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] pl-4">Full Name</label>
                             <input
                                 required
                                 value={newUserData.name}
                                 onChange={(e) => setNewUserData({ ...newUserData, name: e.target.value })}
-                                placeholder="Full Name"
-                                className="w-full bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#005d32]/10"
+                                placeholder="Ex: Jaisil Mohammed"
+                                className="w-full bg-white border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold text-slate-900 focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all outline-none shadow-sm"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Email</label>
+                        <div className="space-y-3">
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] pl-4">Email Address</label>
                             <input
                                 required
                                 type="email"
                                 value={newUserData.email}
                                 onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
-                                placeholder="alex@example.com"
-                                className="w-full bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#005d32]/10"
+                                placeholder="customer@email.com"
+                                className="w-full bg-white border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold text-slate-900 focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all outline-none shadow-sm"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Password</label>
+                        <div className="space-y-3">
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] pl-4">Password</label>
                             <input
                                 required
                                 type="password"
                                 value={newUserData.password}
                                 onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
                                 placeholder="••••••••"
-                                className="w-full bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#005d32]/10"
+                                className="w-full bg-white border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold text-slate-900 focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all outline-none shadow-sm"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Role</label>
+                        <div className="space-y-3">
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] pl-4">User Role</label>
                             <select
                                 value={newUserData.role}
                                 onChange={(e) => setNewUserData({ ...newUserData, role: e.target.value })}
-                                className="w-full bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#005d32]/10"
+                                className="w-full bg-white border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold text-slate-900 focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all outline-none shadow-sm appearance-none cursor-pointer"
                             >
-                                <option value="USER">USER</option>
-                                {currentUserRole === 'SUPER_ADMIN' && <option value="ADMIN">ADMIN</option>}
-                                {currentUserRole === 'SUPER_ADMIN' && <option value="SUPER_ADMIN">SUPER ADMIN</option>}
+                                <option value="USER">Customer</option>
+                                {currentUserRole === 'SUPER_ADMIN' && <option value="ADMIN">Admin</option>}
+                                {currentUserRole === 'SUPER_ADMIN' && <option value="SUPER_ADMIN">Super Admin</option>}
                             </select>
                         </div>
                         <button
                             type="submit"
                             disabled={isCreating}
-                            className="bg-[#005d32] text-white py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#004a28] transition-all disabled:opacity-50"
+                            className="bg-emerald-500 text-white py-4.5 rounded-2xl text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-emerald-400 transition-all disabled:opacity-50 shadow-xl shadow-emerald-500/20 active:scale-95"
                         >
-                            {isCreating ? 'Creating...' : 'Create Account'}
+                            {isCreating ? 'Saving...' : 'Create Customer'}
                         </button>
                     </form>
                 </div>
             )}
 
-            <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-[3rem] border border-slate-50 shadow-sm overflow-hidden relative group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/[0.01] blur-[80px] pointer-events-none" />
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="bg-gray-50 border-b border-gray-100">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-50/50 border-b border-slate-50">
                             <tr>
-                                <th className="p-6 font-black uppercase text-xs text-gray-400 tracking-widest">Customer</th>
-                                <th className="p-6 font-black uppercase text-xs text-gray-400 tracking-widest">Joined</th>
-                                <th className="p-6 font-black uppercase text-xs text-gray-400 tracking-widest">Orders</th>
-                                <th className="p-6 font-black uppercase text-xs text-gray-400 tracking-widest">Role</th>
-                                <th className="p-6 font-black uppercase text-xs text-gray-400 tracking-widest text-right">Actions</th>
+                                <th className="p-8 font-bold uppercase text-[9px] text-slate-400 tracking-[0.3em]">Customer</th>
+                                <th className="p-8 font-bold uppercase text-[9px] text-slate-400 tracking-[0.3em]">Joined Date</th>
+                                <th className="p-8 font-bold uppercase text-[9px] text-slate-400 tracking-[0.3em]">Orders</th>
+                                <th className="p-8 font-bold uppercase text-[9px] text-slate-400 tracking-[0.3em]">Role</th>
+                                <th className="p-8 font-bold uppercase text-[9px] text-slate-400 tracking-[0.3em] text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-slate-50">
                             {initialCustomers.length > 0 ? (
                                 initialCustomers.map((customer: any) => (
-                                    <tr key={customer.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="p-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-full border-2 border-gray-100 bg-gray-50 overflow-hidden shrink-0">
-                                                    <img src={customer.image || `https://i.pravatar.cc/100?u=${customer.email}`} alt={customer.name} />
+                                    <tr key={customer.id} className="hover:bg-slate-50/30 transition-all group/row">
+                                        <td className="p-8">
+                                            <div className="flex items-center gap-6">
+                                                <div className="w-14 h-14 rounded-2xl border border-slate-100 bg-slate-50 p-1 shrink-0 group-hover/row:scale-110 transition-transform duration-500 shadow-sm">
+                                                    <img src={customer.image || `https://ui-avatars.com/api/?name=${customer.name || 'User'}&background=f8fafc&color=0f172a`} alt={customer.name} className="w-full h-full rounded-xl object-cover grayscale group-hover/row:grayscale-0 transition-all duration-700" />
                                                 </div>
-                                                <div>
+                                                <div className="space-y-1 min-w-0">
                                                     {editingId === customer.id ? (
                                                         <input
-                                                            className="font-bold text-gray-900 border rounded px-2 py-1 text-sm bg-white"
+                                                            className="font-bold text-slate-900 border border-slate-200 rounded-lg px-4 py-2 text-sm bg-white focus:ring-4 focus:ring-slate-900/5 outline-none"
                                                             value={editForm.name}
                                                             onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                                                         />
                                                     ) : (
-                                                        <p className="font-bold text-gray-900">{customer.name || 'No Name'}</p>
+                                                        <p className="font-bold text-slate-900 text-sm tracking-tight group-hover/row:text-emerald-600 transition-colors uppercase truncate pr-4">{customer.name || 'Guest User'}</p>
                                                     )}
-                                                    <p className="text-xs text-gray-400 font-medium">{customer.email}</p>
+                                                    <p className="text-[9px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 lowercase opacity-70 group-hover/row:opacity-100 transition-opacity truncate max-w-[200px]">{customer.email}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-6 text-sm text-gray-500 font-medium">
-                                            {new Date(customer.created_at).toLocaleDateString()}
+                                        <td className="p-8 text-xs text-slate-500 font-bold tracking-tight">
+                                            {new Date(customer.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </td>
-                                        <td className="p-6">
-                                            <span className="px-3 py-1 bg-[#f3f9f6] text-[#005d32] rounded-lg text-xs font-black">
-                                                {customer.orders?.[0]?.count || 0} Orders
-                                            </span>
+                                        <td className="p-8">
+                                            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-50 rounded-full border border-slate-100 shadow-inner group-hover/row:bg-emerald-50 group-hover/row:border-emerald-100 transition-all">
+                                                <span className="text-[9px] font-bold text-slate-400 group-hover/row:text-emerald-600 tracking-widest uppercase">
+                                                    {customer.orders?.[0]?.count || 0} Orders
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td className="p-6">
+                                        <td className="p-8">
                                             {editingId === customer.id ? (
                                                 <select
-                                                    className="text-xs font-black uppercase tracking-widest border rounded px-2 py-1 bg-white"
+                                                    className="text-[9px] font-bold uppercase tracking-widest border border-slate-200 rounded-lg px-4 py-2 bg-white focus:ring-4 focus:ring-slate-900/5 outline-none appearance-none cursor-pointer"
                                                     value={editForm.role}
                                                     onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
                                                 >
-                                                    <option value="USER">USER</option>
-                                                    {currentUserRole === 'SUPER_ADMIN' && <option value="ADMIN">ADMIN</option>}
-                                                    {currentUserRole === 'SUPER_ADMIN' && <option value="SUPER_ADMIN">SUPER ADMIN</option>}
+                                                    <option value="USER">Customer</option>
+                                                    {currentUserRole === 'SUPER_ADMIN' && <option value="ADMIN">Admin</option>}
+                                                    {currentUserRole === 'SUPER_ADMIN' && <option value="SUPER_ADMIN">Super Admin</option>}
                                                 </select>
                                             ) : (
-                                                <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest ${customer.role === 'SUPER_ADMIN' ? 'bg-indigo-600 text-white shadow-sm' :
-                                                    customer.role === 'ADMIN' ? 'bg-purple-50 text-purple-600' : 'bg-gray-50 text-gray-400'
+                                                <span className={`px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest border transition-all ${customer.role === 'SUPER_ADMIN' ? 'bg-slate-900 text-emerald-400 border-emerald-500/20 shadow-xl shadow-slate-900/20' :
+                                                    customer.role === 'ADMIN' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'
                                                     }`}>
                                                     {customer.role.replace('_', ' ')}
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="p-6 text-right space-x-2">
-                                            {canManageUser(customer) ? (
-                                                editingId === customer.id ? (
-                                                    <>
-                                                        <button
-                                                            onClick={(e) => handleUpdate(e, customer.id)}
-                                                            className="text-xs font-black text-emerald-600 uppercase hover:underline"
-                                                        >
-                                                            Save
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setEditingId(null)}
-                                                            className="text-xs font-black text-gray-400 uppercase hover:underline"
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                    </>
+                                        <td className="p-8 text-right">
+                                            <div className="flex items-center justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all translate-x-4 group-hover/row:translate-x-0">
+                                                {canManageUser(customer) ? (
+                                                    editingId === customer.id ? (
+                                                        <div className="flex items-center gap-4">
+                                                            <button
+                                                                onClick={(e) => handleUpdate(e, customer.id)}
+                                                                className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest hover:text-emerald-500 transition-colors"
+                                                            >
+                                                                Save
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setEditingId(null)}
+                                                                className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-4">
+                                                            <button
+                                                                onClick={() => handleEditStart(customer)}
+                                                                className="w-10 h-10 flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:text-emerald-600 hover:border-emerald-200 rounded-xl transition-all shadow-sm"
+                                                            >
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDelete(customer.id)}
+                                                                disabled={isDeleting === customer.id}
+                                                                className="w-10 h-10 flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:text-red-500 hover:border-red-200 rounded-xl transition-all shadow-sm disabled:opacity-50"
+                                                            >
+                                                                {isDeleting === customer.id ? '...' : (
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    )
                                                 ) : (
-                                                    <>
-                                                        <button
-                                                            onClick={() => handleEditStart(customer)}
-                                                            className="text-xs font-black text-[#005d32] uppercase hover:underline"
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDelete(customer.id)}
-                                                            disabled={isDeleting === customer.id}
-                                                            className="text-xs font-black text-red-500 uppercase hover:underline disabled:opacity-50"
-                                                        >
-                                                            {isDeleting === customer.id ? 'Deleting...' : 'Delete'}
-                                                        </button>
-                                                    </>
-                                                )
-                                            ) : (
-                                                <span className="text-[10px] font-black text-gray-300 uppercase italic">Locked</span>
-                                            )}
+                                                    <div className="flex items-center gap-2 px-4 py-1.5 bg-slate-50 rounded-full border border-slate-100 opacity-50 grayscale">
+                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">Admin Only</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={5} className="p-12 text-center text-gray-400 font-medium">
-                                        No customers found.
+                                    <td colSpan={5} className="p-32 text-center">
+                                        <div className="flex flex-col items-center justify-center gap-6">
+                                            <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center text-4xl border border-slate-100 grayscale opacity-30">👥</div>
+                                            <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.4em] leading-relaxed">No customers found in the database.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             )}

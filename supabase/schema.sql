@@ -119,10 +119,13 @@ CREATE TABLE IF NOT EXISTS public.orders (
     id uuid NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id uuid REFERENCES public.users(id) ON DELETE SET NULL,
     user_email text NOT NULL,
+    user_name text,
     total numeric(10, 2) NOT NULL,
-    status order_status DEFAULT 'Processing',
+    status text DEFAULT 'Processing',
     shipping_address jsonb,
     payment_info jsonb,
+    shipped_at timestamp with time zone,
+    delivered_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now()
 );
@@ -135,7 +138,8 @@ CREATE TABLE IF NOT EXISTS public.order_items (
     product_name text NOT NULL,
     price numeric(10, 2) NOT NULL,
     quantity integer NOT NULL DEFAULT 1,
-    selected_color text
+    selected_color text,
+    product_image text
 );
 
 -- Blog Posts

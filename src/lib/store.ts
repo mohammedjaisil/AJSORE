@@ -166,7 +166,8 @@ export const useCartStore = create<CartStore>()(
                         avatar: `https://i.pravatar.cc/150?u=${email}`,
                         addresses: [],
                         payments: [],
-                        role: (role as any) || 'USER'
+                        role: (role as any) || 'USER',
+                        created_at: new Date().toISOString()
                     }
                 });
             },
@@ -179,12 +180,23 @@ export const useCartStore = create<CartStore>()(
             },
         }),
         {
-            name: 'ajstore-cart',
+            name: 'buykko-cart',
+            version: 1,
+            migrate: (persistedState: any, version: number) => {
+                if (version === 0) {
+                    return {
+                        ...persistedState,
+                        currency: CURRENCIES[0],
+                    };
+                }
+                return persistedState;
+            },
             partialize: (state) => ({
                 cart: state.cart,
                 wishlist: state.wishlist,
                 savedForLater: state.savedForLater,
                 currency: state.currency,
+                user: state.user,
             }),
         }
     )

@@ -26,14 +26,14 @@ export default function ToastContainer() {
                         {toast.type === 'success' ? '✅' : toast.type === 'error' ? '❌' : 'ℹ️'}
                     </div>
                     <div className="flex-1">
-                        <p className="text-xs font-black uppercase tracking-widest opacity-50 mb-0.5">
+                        <p className="text-xs font-bold uppercase tracking-widest opacity-50 mb-0.5">
                             {toast.type}
                         </p>
                         <p className="text-sm font-bold leading-snug">{toast.message}</p>
                     </div>
                     <button
                         onClick={() => removeToast(toast.id)}
-                        className="p-1 hover:bg-black/5 rounded-lg transition-colors text-lg"
+                        className="p-1 hover:bg-primary/5 rounded-lg transition-colors text-lg"
                     >
                         ✕
                     </button>

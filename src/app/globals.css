@@ -1,16 +1,44 @@
-@tailwind base;
+/* Lenis smooth scroll — must be imported before Tailwind */
+@import 'lenis/dist/lenis.css';
 
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: auto; /* Let Lenis handle scrolling, not CSS */
+}
+
 :root {
-  --primary: #005d32;
-  --primary-light: #f3f9f6;
+  --primary: #000000;
+  --secondary: #FFFFFF;
+  --accent-nude: #E8D5D0;
+  --accent-sage: #94A37D;
+  --gray-light: #F5F5F5;
+  --text-main: #1A1A1A;
+  --text-muted: #717171;
 }
 
 body {
   -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overscroll-behavior-y: none;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.text-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted;
+}
+
+.text-heading {
+    @apply text-3xl font-bold text-text-main tracking-tight leading-[1.1];
+}
+
+.card-title {
+    @apply text-sm font-semibold text-text-main;
 }
 
 
@@ -51,3 +79,43 @@ html {
   background: var(--primary);
   color: white;
 }
+
+/* Premium UI Transitions & Utilities */
+@layer utilities {
+  .ease-expo {
+    transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .text-gradient-monochrome {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-black via-zinc-800 to-zinc-600;
+  }
+
+  .glass {
+    @apply backdrop-blur-md bg-white/70 border border-white/20;
+  }
+
+  .shadow-premium {
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 20px -5px rgba(0, 0, 0, 0.02);
+  }
+}
+
+.animate-in {
+  animation-duration: 600ms;
+}
+
+/* ==============================
+   Scroll Reveal Animations
+   (Lenis-compatible via IntersectionObserver)
+   ============================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}

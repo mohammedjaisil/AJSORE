@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { SessionProvider, useSession } from 'next-auth/react';
 import { useCartStore } from '@/lib/store';
@@ -12,13 +12,51 @@ import BottomNav from '@/components/BottomNav';
 import QuickViewModal from '@/components/QuickViewModal';
 import ToastContainer from '@/components/ToastContainer';
 
+// Lenis smooth scroll — runs once at top level, independent of auth state
+function SmoothScroll() {
+    useEffect(() => {
+        let rafId: number;
+
+        // Dynamically import to avoid SSR issues
+        import('lenis').then(({ default: Lenis }) => {
+            const lenis = new Lenis({
+                duration: 1.4,
+                easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smoothWheel: true,
+                wheelMultiplier: 1,
+                touchMultiplier: 2,
+            } as any);
+
+            function raf(time: number) {
+                lenis.raf(time);
+                rafId = requestAnimationFrame(raf);
+            }
+
+            rafId = requestAnimationFrame(raf);
+
+            // Store on window for external access if needed
+            (window as any).__lenis = lenis;
+        });
+
+        return () => {
+            cancelAnimationFrame(rafId);
+            if ((window as any).__lenis) {
+                (window as any).__lenis.destroy();
+                delete (window as any).__lenis;
+            }
+        };
+    }, []); // Empty deps — runs once, never restarts
+
+    return null;
+}
+
+// Session sync — separate from scroll, handles auth state only
 function SessionSync() {
     const { data: session, status } = useSession();
     const { login, logout, user } = useCartStore();
 
     useEffect(() => {
         if (status === 'authenticated' && session?.user?.email) {
-            // Only login if (store) user is not set or different
             if (!user || user.email !== session.user.email || user.role !== (session.user as any).role) {
                 login(session.user.email, (session.user as any).role);
             }
@@ -30,39 +68,22 @@ function SessionSync() {
     return null;
 }
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
-    const [isVisible, setIsVisible] = useState(false);
+export default function ClientLayout({ children, branding }: { children: React.ReactNode, branding?: any }) {
     const pathname = usePathname();
-
-    useEffect(() => {
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
-    }, [pathname]);
-
-    useEffect(() => {
-        setIsVisible(false);
-        const timer = setTimeout(() => setIsVisible(true), 10);
-        return () => clearTimeout(timer);
-    }, [pathname]);
-
-
     const isAdmin = pathname?.startsWith('/admin');
 
     return (
         <SessionProvider>
+            <SmoothScroll />
             <SessionSync />
             <ToastContainer />
-            <div className={`flex flex-col min-h-screen selection:bg-[#005d32] selection:text-white overflow-x-hidden ${isAdmin ? '' : 'pb-20 md:pb-0 pt-24 md:pt-32'}`}>
-                {!isAdmin && <Navbar />}
+            <div className={`flex flex-col min-h-screen selection:bg-black selection:text-white overflow-x-hidden ${isAdmin ? '' : 'pb-20 md:pb-0 pt-16'}`}>
+                {!isAdmin && <Navbar branding={branding} />}
                 {!isAdmin && <Breadcrumbs />}
                 <main className="flex-1">
-                    <div
-                        className={`transition-all duration-500 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                            }`}
-                    >
-                        {children}
-                    </div>
+                    {children}
                 </main>
-                {!isAdmin && <Footer />}
+                {!isAdmin && <Footer branding={branding} />}
                 {!isAdmin && <QuickViewModal />}
                 {!isAdmin && <MiniCart />}
                 {!isAdmin && <BottomNav />}

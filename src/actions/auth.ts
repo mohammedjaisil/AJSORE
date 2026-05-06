@@ -9,7 +9,7 @@ export async function signupAction(formData: FormData) {
     const password = formData.get("password") as string;
     const name = formData.get("name") as string;
 
-    if (!email || !password) return { error: "Missing fields" };
+    if (!email || !password) return { error: "Email and password are required." };
 
     try {
         // 1. Check if user already exists
@@ -19,13 +19,13 @@ export async function signupAction(formData: FormData) {
             .eq('email', email)
             .single();
 
-        if (existingUser) return { error: "User already exists" };
+        if (existingUser) return { error: "An account with this email already exists. Please sign in." };
 
         // 2. Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // 3. Create user
-        const { data: newUser, error: createError } = await supabaseAdmin
+        const { error: createError } = await supabaseAdmin
             .from('users')
             .insert({
                 email,
@@ -33,23 +33,14 @@ export async function signupAction(formData: FormData) {
                 name: name || email.split("@")[0],
                 image: `https://i.pravatar.cc/150?u=${email}`,
                 role: 'USER'
-            })
-            .select()
-            .single();
+            });
 
         if (createError) throw createError;
 
-        // 4. Sign in with the new account
-        // We set redirect: false to handle the redirect manually and ensure a clean state
-        await signIn("credentials", {
-            email,
-            password,
-            redirect: false
-        });
-
         return { success: true };
     } catch (error) {
-        return { error: "Failed to create account" };
+        console.error('Signup error:', error);
+        return { error: "Failed to create account. Please try again." };
     }
 }
 
@@ -57,20 +48,37 @@ export async function loginAction(formData: FormData) {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    if (!email || !password) return { error: "Missing fields" };
+    if (!email || !password) return { error: "Email and password are required." };
 
     try {
-        const result = await signIn("credentials", {
+        // Step 1: Manually verify credentials before calling signIn
+        const { data: user } = await supabaseAdmin
+            .from('users')
+            .select('id, email, password, role')
+            .eq('email', email)
+            .single();
+
+        if (!user) return { error: "No account found with that email address." };
+        if (!user.password) return { error: "This account uses social login. Please sign in with Google." };
+
+        const passwordsMatch = await bcrypt.compare(password, user.password);
+        if (!passwordsMatch) return { error: "Incorrect password. Please try again." };
+
+        // Step 2: Credentials verified — trigger signIn with redirect
+        await signIn("credentials", {
             email,
             password,
-            redirect: false,
+            redirectTo: "/account",
         });
 
-        if (result?.error) return { error: "Invalid credentials" };
-
         return { success: true };
-    } catch (error) {
-        return { error: "Authentication failed" };
+    } catch (error: any) {
+        // NEXT_REDIRECT is thrown by Next.js on successful redirect — this is expected
+        if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+            return { success: true };
+        }
+        console.error('Login error:', error);
+        return { error: "Authentication failed. Please try again." };
     }
 }
 

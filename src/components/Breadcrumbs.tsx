@@ -11,7 +11,7 @@ const Breadcrumbs: React.FC = () => {
     if (pathname === '/') return null;
 
     return (
-        <nav className="max-w-7xl mx-auto px-4 md:px-12 py-4 flex" aria-label="Breadcrumb">
+        <nav className="max-w-7xl mx-auto px-4 md:px-12 py-4 hidden md:flex" aria-label="Breadcrumb">
             <ol className="inline-flex items-center space-x-1 md:space-x-3 text-xs font-medium text-gray-400">
                 <li className="inline-flex items-center">
                     <Link href="/" className="hover:text-[#005d32] transition-colors flex items-center">
@@ -33,7 +33,7 @@ const Breadcrumbs: React.FC = () => {
                                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                 </svg>
                                 {last ? (
-                                    <span className="ml-1 md:ml-2 text-gray-900 font-bold">{label}</span>
+                                    <span className="ml-1 md:ml-2 text-slate-900 font-bold">{label}</span>
                                 ) : (
                                     <Link href={to} className="ml-1 md:ml-2 hover:text-[#005d32] transition-colors">
                                         {label}

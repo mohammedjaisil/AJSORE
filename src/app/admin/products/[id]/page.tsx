@@ -19,7 +19,7 @@ async function getProductWithVariations(id: string) {
 
     return {
         ...product,
-        category: product.category_name, // Mapping to form field
+        category: product.category_name,
         oldPrice: product.old_price,
         variations: product.product_variations || []
     };
@@ -34,8 +34,11 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     }
 
     return (
-        <div className="space-y-8">
-            <h2 className="text-3xl font-black text-gray-900 tracking-tight">Edit Product</h2>
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div>
+                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Edit Product</h2>
+                <p className="text-gray-400 text-xs font-semibold mt-1">ID: {id.slice(0, 12)}...</p>
+            </div>
             <ProductForm initialData={product} />
         </div>
     );

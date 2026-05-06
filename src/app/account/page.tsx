@@ -3,288 +3,344 @@
 import React, { useState, useEffect } from 'react';
 import { useCartStore } from '@/lib/store';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import ProductCard from '@/components/ProductCard';
+import { getUserOrders } from '@/actions/orders';
+import { Order } from '@/types';
+import { useToast } from '@/lib/toast-store';
 
-type Tab = 'orders' | 'wishlist' | 'settings';
+type Tab = 'orders' | 'wishlist' | 'addresses' | 'payment' | 'settings';
+
+const TABS: { id: Tab; label: string; icon: string }[] = [
+    { id: 'orders', label: 'My Orders', icon: '📦' },
+    { id: 'wishlist', label: 'Wishlist', icon: '❤️' },
+    { id: 'addresses', label: 'Saved Addresses', icon: '📍' },
+    { id: 'payment', label: 'Payment Methods', icon: '💳' },
+    { id: 'settings', label: 'Profile Settings', icon: '⚙️' },
+];
 
 const Account: React.FC = () => {
-    const { user, orders, wishlist, logout, reorder, cart } = useCartStore();
+    const { user, wishlist, logout, formatPrice } = useCartStore();
+    const { data: session, status } = useSession();
+    const { addToast } = useToast();
+    const [dbOrders, setDbOrders] = useState<Order[]>([]);
+    const [isLoadingOrders, setIsLoadingOrders] = useState(true);
     const [activeTab, setActiveTab] = useState<Tab>('orders');
+    const [editName, setEditName] = useState('');
     const router = useRouter();
 
     useEffect(() => {
-        if (!user) {
+        if (status === 'unauthenticated') {
             router.push('/login');
+            return;
         }
-    }, [user, router]);
 
-    if (!user) {
-        return null; // Don't render anything while redirecting
+        if (status === 'authenticated' && user) {
+            setEditName(user.name);
+            const fetchOrders = async () => {
+                setIsLoadingOrders(true);
+                const data = await getUserOrders();
+                setDbOrders(data as Order[]);
+                setIsLoadingOrders(false);
+            };
+            fetchOrders();
+        }
+    }, [user, router, status]);
+
+    if (status === 'loading' || (status === 'authenticated' && !user)) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+                <div className="w-12 h-12 border-4 border-gray-100 border-t-black rounded-full animate-spin" />
+                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest animate-pulse">Checking Session...</p>
+            </div>
+        );
     }
 
-    const getStatusColor = (status: string) => {
+    if (!user) return null;
+
+    const getStatusStyles = (status: string) => {
         switch (status) {
-            case 'Delivered': return 'bg-green-100 text-green-700';
-            case 'Shipped': return 'bg-blue-100 text-blue-700';
-            case 'Processing': return 'bg-orange-100 text-orange-700';
-            default: return 'bg-gray-100 text-gray-700';
+            case 'Delivered': return 'bg-accent-sage/10 text-accent-sage border-accent-sage/20';
+            case 'Shipped': return 'bg-blue-50 text-blue-600 border-blue-100';
+            case 'Processing': return 'bg-accent-nude/20 text-accent-nude border-accent-nude/30';
+            case 'Cancelled': return 'bg-red-50 text-red-600 border-red-100';
+            default: return 'bg-gray-50 text-text-muted border-gray-100';
         }
     };
 
-    const statusTimeline = [
-        { label: 'Ordered', icon: '📝', date: 'Oct 28' },
-        { label: 'Processing', icon: '⚙️', date: 'Oct 29' },
-        { label: 'Shipped', icon: '🚚', date: 'Oct 30' },
-        { label: 'Delivered', icon: '🎁', date: '--' }
+    const getTimelineProgress = (status: string) => {
+        switch (status) {
+            case 'Processing': return '33%';
+            case 'Shipped': return '66%';
+            case 'Delivered': return '100%';
+            default: return '0%';
+        }
+    };
+
+    const timelineSteps = [
+        { label: 'Placed', icon: '📝' },
+        { label: 'Processing', icon: '⚙️' },
+        { label: 'Shipped', icon: '🚚' },
+        { label: 'Delivered', icon: '✨' },
     ];
 
+    const handleShareWishlist = () => {
+        navigator.clipboard.writeText(window.location.origin + '/wishlist');
+        addToast('Wishlist link copied!', 'success');
+    };
+
     return (
-        <div className="max-w-7xl mx-auto px-4 md:px-12 py-12">
-            <div className="flex flex-col lg:flex-row gap-12">
-                {/* Sidebar Profile Card */}
-                <aside className="w-full lg:w-80 space-y-6">
-                    <div className="bg-white border rounded-[2.5rem] p-8 text-center space-y-6 shadow-sm">
-                        <div className="relative inline-block">
-                            <img src={user.avatar} alt={user.name} className="w-24 h-24 rounded-full mx-auto border-4 border-[#f3f9f6]" />
-                            <button className="absolute bottom-0 right-0 bg-[#005d32] text-white p-2 rounded-full shadow-lg border-2 border-white hover:scale-110 transition-transform">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
-                            </button>
+        <div className="bg-[#F9F9F9] min-h-screen">
+            <div className="max-w-[1400px] mx-auto px-6 py-16">
+                <div className="flex flex-col lg:flex-row gap-16 items-start">
+                    {/* Sidebar */}
+                    <aside className="w-full lg:w-80 shrink-0 space-y-8 lg:sticky lg:top-32">
+                        {/* Profile Info */}
+                        <div className="bg-white rounded-5xl p-10 text-center space-y-6 border border-gray-50 shadow-sm">
+                            <div className="relative inline-block">
+                                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#F9F9F9] shadow-sm mx-auto">
+                                    <img
+                                        src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=000&color=fff&size=128`}
+                                        alt={user.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-accent-sage rounded-full flex items-center justify-center text-white text-[10px] border-2 border-white">✓</div>
+                            </div>
+                            <div className="space-y-1">
+                                <h2 className="text-xl font-bold tracking-tight uppercase">{user.name}</h2>
+                                <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{user.email}</p>
+                            </div>
+
+                            <div className="pt-6 border-t border-gray-50 grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-xl font-bold">{dbOrders.length}</p>
+                                    <p className="text-[9px] font-bold text-text-muted uppercase tracking-widest">Orders</p>
+                                </div>
+                                <div>
+                                    <p className="text-xl font-bold">{wishlist.length}</p>
+                                    <p className="text-[9px] font-bold text-text-muted uppercase tracking-widest">Saved</p>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-xl font-black text-gray-900">{user.name}</h2>
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{user.email}</p>
-                        </div>
-                        <div className="flex flex-col gap-2">
+
+                        {/* Navigation */}
+                        <nav className="bg-white rounded-4xl p-4 space-y-1 border border-gray-50 shadow-sm">
                             {(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
-                                <Link
-                                    href="/admin"
-                                    className="w-full py-3.5 px-6 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left flex items-center gap-3 bg-purple-50 text-purple-600 hover:bg-purple-100 mb-2"
-                                >
-                                    <span>📊</span> Admin Dashboard
+                                <Link href="/admin" className="flex items-center gap-4 px-6 py-4 rounded-3xl text-[10px] font-bold uppercase tracking-widest bg-accent-nude/10 text-accent-nude hover:bg-accent-nude/20 transition-all mb-2">
+                                    📊 Admin Panel
                                 </Link>
                             )}
+                            {TABS.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`w-full flex items-center gap-4 px-6 py-4 rounded-3xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-text-muted hover:bg-[#F9F9F9] hover:text-black'}`}
+                                >
+                                    <span>{tab.icon}</span> {tab.label}
+                                </button>
+                            ))}
                             <button
-                                onClick={() => setActiveTab('orders')}
-                                className={`w-full py-3.5 px-6 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left flex items-center gap-3 ${activeTab === 'orders' ? 'bg-[#005d32] text-white shadow-lg shadow-[#005d32]/20' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
+                                onClick={async () => { logout(); await signOut({ callbackUrl: '/' }); }}
+                                className="w-full flex items-center gap-4 px-6 py-4 rounded-3xl text-[10px] font-bold uppercase tracking-widest text-red-400 hover:bg-red-50 transition-all mt-4 border-t border-gray-50 pt-6"
                             >
-                                <span>📦</span> My Orders
+                                🚪 Sign Out
                             </button>
-                            <button
-                                onClick={() => setActiveTab('wishlist')}
-                                className={`w-full py-3.5 px-6 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left flex items-center gap-3 ${activeTab === 'wishlist' ? 'bg-[#005d32] text-white shadow-lg shadow-[#005d32]/20' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
-                            >
-                                <span>❤️</span> Wishlist
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('settings')}
-                                className={`w-full py-3.5 px-6 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left flex items-center gap-3 ${activeTab === 'settings' ? 'bg-[#005d32] text-white shadow-lg shadow-[#005d32]/20' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
-                            >
-                                <span>👤</span> Account Settings
-                            </button>
-                        </div>
-                        <button
-                            onClick={async () => {
-                                logout(); // Clear zustand store
-                                await signOut({ callbackUrl: '/' });
-                            }}
-                            className="w-full text-center text-xs font-black uppercase text-red-500 hover:underline pt-4 border-t"
-                        >
-                            Log Out
-                        </button>
-                    </div>
+                        </nav>
+                    </aside>
 
-                    <div className="bg-[#f3f9f6] p-8 rounded-[2.5rem] border border-[#005d32]/5 space-y-4">
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#005d32]">Premium Benefits</h4>
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-3 text-xs font-bold text-gray-600">
-                                <span className="w-6 h-6 bg-white rounded-lg flex items-center justify-center">✨</span>
-                                Free Shipping on all orders
-                            </div>
-                            <div className="flex items-center gap-3 text-xs font-bold text-gray-600">
-                                <span className="w-6 h-6 bg-white rounded-lg flex items-center justify-center">🎁</span>
-                                Exclusive Early Access
-                            </div>
-                        </div>
-                    </div>
-                </aside>
-
-                {/* Main Content Area */}
-                <main className="flex-1 space-y-12">
-                    {activeTab === 'orders' && (
-                        <section className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                            <div className="flex items-end justify-between">
-                                <h1 className="text-3xl font-black text-gray-900 uppercase tracking-tighter">Order History</h1>
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{orders.length} Orders total</p>
-                            </div>
-
-                            <div className="space-y-6">
-                                {orders.map((order) => (
-                                    <div key={order.id} className="bg-white border rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                                        <div className="p-8 border-b bg-gray-50/50 flex flex-wrap items-center justify-between gap-6">
-                                            <div className="flex flex-wrap gap-8">
-                                                <div>
-                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Order ID</p>
-                                                    <p className="font-black text-gray-900">{order.id}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Date Placed</p>
-                                                    <p className="font-black text-gray-900">{order.date}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Amount</p>
-                                                    <p className="font-black text-[#005d32]">${order.total.toFixed(2)}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
-                                                    {order.status}
-                                                </span>
-                                                <button
-                                                    onClick={() => reorder(order.id)}
-                                                    className="bg-white border-2 border-[#005d32] text-[#005d32] px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-[#005d32] hover:text-white transition-all shadow-sm"
-                                                >
-                                                    Reorder All
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-8 space-y-8">
-                                            {/* Tracking Timeline */}
-                                            {order.status !== 'Delivered' && (
-                                                <div className="bg-white p-6 rounded-3xl border-2 border-dashed border-gray-100">
-                                                    <div className="flex items-center justify-between max-w-xl mx-auto relative mb-2">
-                                                        <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-100 -translate-y-1/2" />
-                                                        <div className="absolute top-1/2 left-0 h-0.5 bg-[#005d32] -translate-y-1/2" style={{ width: '66%' }} />
-                                                        {statusTimeline.map((s, i) => (
-                                                            <div key={i} className="relative z-10 flex flex-col items-center gap-2">
-                                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shadow-md border-2 ${i < 3 ? 'bg-[#005d32] text-white border-[#005d32]' : 'bg-white text-gray-400 border-gray-100'}`}>
-                                                                    {s.icon}
-                                                                </div>
-                                                                <div className="text-center">
-                                                                    <p className={`text-[9px] font-black uppercase tracking-tighter ${i < 3 ? 'text-[#005d32]' : 'text-gray-400'}`}>{s.label}</p>
-                                                                    <p className="text-[8px] text-gray-400 font-bold">{s.date}</p>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            <div className="divide-y">
-                                                {order.items.map((item, i) => (
-                                                    <div key={i} className="py-4 flex items-center gap-6 first:pt-0 last:pb-0 group">
-                                                        <div className="w-16 h-16 bg-gray-50 rounded-2xl p-3 flex items-center justify-center shrink-0">
-                                                            <img src={item.image} alt={item.name} className="max-h-full mix-blend-multiply group-hover:scale-110 transition-transform" />
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <h4 className="font-bold text-gray-900 truncate">{item.name}</h4>
-                                                            <p className="text-[10px] text-gray-400 font-black uppercase">Qty: {item.quantity} • ${item.price.toFixed(2)}</p>
-                                                        </div>
-                                                        <Link
-                                                            href={`/product/${item.id}`}
-                                                            className="text-[10px] font-black text-[#005d32] uppercase hover:underline"
-                                                        >
-                                                            Track Item
-                                                        </Link>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-
-                    {activeTab === 'wishlist' && (
-                        <section className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                            <div className="flex items-end justify-between">
-                                <h1 className="text-3xl font-black text-gray-900 uppercase tracking-tighter">Your Wishlist</h1>
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{wishlist.length} Items saved</p>
-                            </div>
-
-                            {wishlist.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                                    {wishlist.map(p => <ProductCard key={p.id} product={p} />)}
-                                </div>
-                            ) : (
-                                <div className="text-center py-24 bg-white border-2 border-dashed border-gray-100 rounded-[2.5rem]">
-                                    <span className="text-5xl block mb-4">✨</span>
-                                    <p className="text-gray-400 font-bold">Your wishlist is currently empty.</p>
-                                    <Link href="/shop" className="text-[#005d32] font-black uppercase text-xs mt-4 inline-block hover:underline">Explore Products</Link>
-                                </div>
-                            )}
-                        </section>
-                    )}
-
-                    {activeTab === 'settings' && (
-                        <section className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-500">
-                            <div className="flex items-end justify-between">
-                                <h1 className="text-3xl font-black text-gray-900 uppercase tracking-tighter">Account Details</h1>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {/* Saved Addresses */}
-                                <div className="bg-white border rounded-[2.5rem] p-8 space-y-6">
-                                    <div className="flex items-center justify-between border-b pb-4">
-                                        <h3 className="font-black text-gray-900 uppercase tracking-tighter">Saved Addresses</h3>
-                                        <button className="text-[10px] font-black text-[#005d32] uppercase hover:underline">+ Add New</button>
-                                    </div>
-                                    <div className="space-y-4">
-                                        {user.addresses.map(addr => (
-                                            <div key={addr.id} className="p-4 bg-gray-50 rounded-2xl flex items-start gap-4 hover:border-[#005d32] border border-transparent transition-all group">
-                                                <span className="text-xl">🏠</span>
-                                                <div className="flex-1">
-                                                    <p className="text-[10px] font-black text-[#005d32] uppercase tracking-widest">{addr.type}</p>
-                                                    <p className="text-sm font-medium text-gray-600 leading-snug">{addr.address}</p>
-                                                </div>
-                                                <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <svg className="w-4 h-4 text-gray-400 hover:text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Payment Methods */}
-                                <div className="bg-white border rounded-[2.5rem] p-8 space-y-6">
-                                    <div className="flex items-center justify-between border-b pb-4">
-                                        <h3 className="font-black text-gray-900 uppercase tracking-tighter">Payment Methods</h3>
-                                        <button className="text-[10px] font-black text-[#005d32] uppercase hover:underline">+ Add New</button>
-                                    </div>
-                                    <div className="space-y-4">
-                                        {user.payments.map(pay => (
-                                            <div key={pay.id} className="p-4 bg-gray-50 rounded-2xl flex items-center gap-4 hover:border-[#005d32] border border-transparent transition-all group">
-                                                <span className="text-xl">{pay.type === 'Visa' ? '💳' : '🏦'}</span>
-                                                <div className="flex-1">
-                                                    <p className="text-sm font-black text-gray-900">{pay.type} Card</p>
-                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ending in {pay.last4}</p>
-                                                </div>
-                                                <div className="bg-white px-3 py-1 rounded-lg text-[8px] font-black uppercase text-gray-400 border">Default</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Account Security */}
-                            <div className="bg-gray-900 text-white rounded-[2.5rem] p-12 space-y-8 shadow-2xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-[#005d32] opacity-20 blur-[100px] pointer-events-none" />
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
+                    {/* Main Content */}
+                    <main className="flex-1 min-w-0">
+                        {/* ORDERS TAB */}
+                        {activeTab === 'orders' && (
+                            <div className="space-y-12 animate-in fade-in duration-500">
+                                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-gray-100 pb-8">
                                     <div className="space-y-2">
-                                        <h3 className="text-2xl font-black uppercase tracking-tighter">Account Security</h3>
-                                        <p className="text-gray-400 text-sm font-medium">Keep your account safe by updating your password regularly.</p>
+                                        <h1 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">My Orders</h1>
+                                        <p className="text-text-muted text-sm">{dbOrders.length} collections curated for you.</p>
                                     </div>
-                                    <button className="bg-white text-gray-900 px-8 py-4 rounded-full font-black uppercase text-xs tracking-widest hover:bg-gray-100 transition-all transform active:scale-95">
-                                        Change Password
-                                    </button>
+                                    <Link href="/shop" className="text-[10px] font-bold uppercase tracking-widest hover:underline">Explore More →</Link>
+                                </div>
+
+                                {isLoadingOrders ? (
+                                    <div className="py-32 flex flex-col items-center justify-center gap-4">
+                                        <div className="w-10 h-10 border-2 border-gray-100 border-t-black rounded-full animate-spin" />
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Fetching Orders...</p>
+                                    </div>
+                                ) : dbOrders.length > 0 ? (
+                                    <div className="space-y-8">
+                                        {dbOrders.map((order) => (
+                                            <div key={order.id} className="bg-white rounded-5xl border border-gray-50 shadow-sm overflow-hidden hover:shadow-md transition-all group">
+                                                {/* Header */}
+                                                <div className="p-8 md:p-10 bg-[#F9F9F9]/50 border-b border-gray-50 flex flex-wrap items-center justify-between gap-8">
+                                                    <div className="flex flex-wrap gap-10">
+                                                        <div>
+                                                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-text-muted mb-2">Reference</p>
+                                                            <p className="text-xs font-bold font-mono text-black">#{order.id.slice(-8).toUpperCase()}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-text-muted mb-2">Date</p>
+                                                            <p className="text-xs font-bold">{new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-text-muted mb-2">Total</p>
+                                                            <p className="text-xs font-bold">{formatPrice(order.total)}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
+                                                        <span className={`px-5 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest border ${getStatusStyles(order.status)}`}>
+                                                            {order.status}
+                                                        </span>
+                                                        <Link href={`/track?id=${order.id}`} className="px-5 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest bg-white border border-gray-200 hover:border-black transition-all">Track</Link>
+                                                    </div>
+                                                </div>
+
+                                                {/* Tracking */}
+                                                <div className="px-10 py-12 max-w-2xl mx-auto relative">
+                                                    <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gray-100 -translate-y-1/2" />
+                                                    <div className="absolute top-1/2 left-0 h-[1px] bg-accent-sage -translate-y-1/2 transition-all duration-1000" style={{ width: getTimelineProgress(order.status) }} />
+                                                    <div className="flex justify-between items-center relative z-10">
+                                                        {timelineSteps.map((step, i) => {
+                                                            const currentIdx = timelineSteps.findIndex(x => x.label === order.status);
+                                                            const isDone = i <= (currentIdx === -1 ? 0 : currentIdx);
+                                                            return (
+                                                                <div key={i} className="flex flex-col items-center gap-3">
+                                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs transition-all ${isDone ? 'bg-accent-sage text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-200'}`}>
+                                                                        {isDone ? '✓' : step.icon}
+                                                                    </div>
+                                                                    <span className={`text-[8px] font-bold uppercase tracking-widest ${isDone ? 'text-black' : 'text-gray-300'}`}>{step.label}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+
+                                                {/* Items */}
+                                                <div className="px-8 pb-10 space-y-4">
+                                                    {order.items?.map((item, i) => (
+                                                        <div key={i} className="flex items-center gap-6 p-6 bg-[#F9F9F9] rounded-3xl border border-transparent hover:border-gray-100 hover:bg-white transition-all">
+                                                            <div className="w-16 h-16 bg-white rounded-2xl p-2 flex items-center justify-center border border-gray-50 shrink-0">
+                                                                <img src={item.image} alt={item.name} className="max-h-full object-contain" />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-xs font-bold uppercase tracking-tight truncate">{item.name}</p>
+                                                                <p className="text-[9px] font-bold text-text-muted uppercase tracking-widest mt-1">Qty: {item.quantity} · {formatPrice(item.price)}</p>
+                                                            </div>
+                                                            <Link href={`/product/${item.id}`} className="text-[9px] font-bold uppercase tracking-widest hover:underline">View</Link>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-32 bg-white rounded-5xl border border-gray-50 flex flex-col items-center gap-6">
+                                        <div className="w-20 h-20 bg-[#F9F9F9] rounded-full flex items-center justify-center text-2xl">📦</div>
+                                        <h3 className="text-xl font-bold tracking-tight">No orders yet</h3>
+                                        <p className="text-text-muted text-sm max-w-xs leading-relaxed">Your journey begins with your first selection. Explore our premium curation.</p>
+                                        <Link href="/shop" className="bg-black text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-800 transition-all">Start Shopping</Link>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* WISHLIST TAB */}
+                        {activeTab === 'wishlist' && (
+                            <div className="space-y-12 animate-in fade-in duration-500">
+                                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-gray-100 pb-8">
+                                    <div className="space-y-2">
+                                        <h1 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">Wishlist</h1>
+                                        <p className="text-text-muted text-sm">{wishlist.length} premium pieces saved for later.</p>
+                                    </div>
+                                    {wishlist.length > 0 && (
+                                        <button onClick={handleShareWishlist} className="px-8 py-3 rounded-full border border-gray-200 text-[10px] font-bold uppercase tracking-widest hover:border-black transition-all">Share Link</button>
+                                    )}
+                                </div>
+
+                                {wishlist.length > 0 ? (
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+                                        {wishlist.map(p => <ProductCard key={p.id} product={p} />)}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-32 bg-white rounded-5xl border border-gray-50 flex flex-col items-center gap-6">
+                                        <div className="w-20 h-20 bg-[#F9F9F9] rounded-full flex items-center justify-center text-2xl">❤️</div>
+                                        <h3 className="text-xl font-bold tracking-tight">Your wishlist is empty</h3>
+                                        <p className="text-text-muted text-sm max-w-xs leading-relaxed">Collect the pieces that speak to you. They will be waiting here.</p>
+                                        <Link href="/shop" className="bg-black text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-800 transition-all">Browse Collection</Link>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* SETTINGS TAB */}
+                        {activeTab === 'settings' && (
+                            <div className="space-y-12 animate-in fade-in duration-500">
+                                <div className="border-b border-gray-100 pb-8">
+                                    <h1 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">Settings</h1>
+                                    <p className="text-text-muted text-sm mt-2">Manage your profile and security preferences.</p>
+                                </div>
+
+                                <div className="bg-white rounded-5xl p-10 md:p-12 space-y-10 border border-gray-50 shadow-sm">
+                                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-text-muted border-b border-gray-50 pb-6">Personal Profile</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">Full Name</label>
+                                            <input
+                                                type="text"
+                                                value={editName}
+                                                onChange={e => setEditName(e.target.value)}
+                                                className="w-full bg-[#F9F9F9] border border-transparent rounded-2xl px-6 py-4 text-sm font-medium focus:bg-white focus:border-black transition-all outline-none"
+                                            />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">Email Address</label>
+                                            <input
+                                                type="email"
+                                                value={user.email}
+                                                readOnly
+                                                className="w-full bg-[#F9F9F9] border border-transparent rounded-2xl px-6 py-4 text-sm font-medium text-text-muted opacity-50 cursor-not-allowed"
+                                            />
+                                        </div>
+                                    </div>
+                                    <button onClick={() => addToast('Profile updated!', 'success')} className="bg-black text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-800 transition-all transform active:scale-95 shadow-xl shadow-black/10">Update Profile</button>
+                                </div>
+
+                                <div className="bg-black text-white rounded-5xl p-10 md:p-12 space-y-10 shadow-2xl shadow-black/20">
+                                    <div className="flex items-center gap-6 border-b border-white/10 pb-8">
+                                        <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-3xl">🛡️</div>
+                                        <div>
+                                            <h3 className="text-xl font-bold tracking-tight uppercase">Security</h3>
+                                            <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">Change your password</p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        {['Current Password', 'New Password', 'Confirm Password'].map((l, i) => (
+                                            <div key={i} className="space-y-3">
+                                                <label className="text-[9px] font-bold uppercase tracking-widest text-white/30 px-1">{l}</label>
+                                                <input
+                                                    type="password"
+                                                    placeholder="••••••••"
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-medium focus:bg-white/10 focus:border-white/30 transition-all outline-none"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button onClick={() => addToast('Password changed!', 'success')} className="bg-white text-black px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-gray-100 transition-all transform active:scale-95">Update Security</button>
+                                </div>
+
+                                <div className="p-10 border border-red-100 rounded-4xl bg-red-50/20 space-y-6">
+                                    <div className="space-y-2">
+                                        <h3 className="text-sm font-bold uppercase tracking-widest text-red-600">Danger Zone</h3>
+                                        <p className="text-text-muted text-xs leading-relaxed max-w-lg">Permanently deactivate your account and remove all personal data. This action is irreversible.</p>
+                                    </div>
+                                    <button className="text-[10px] font-bold uppercase tracking-widest text-red-500 border border-red-200 px-8 py-3 rounded-full hover:bg-red-500 hover:text-white transition-all">Deactivate Account</button>
                                 </div>
                             </div>
-                        </section>
-                    )}
-                </main>
+                        )}
+                    </main>
+                </div>
             </div>
         </div>
     );

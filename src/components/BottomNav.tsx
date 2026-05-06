@@ -7,26 +7,26 @@ import { useCartStore } from '@/lib/store';
 
 const BottomNav: React.FC = () => {
     const pathname = usePathname();
-    const { cart } = useCartStore();
+    const { cart, wishlist } = useCartStore();
 
     const isActive = (path: string) => pathname === path;
 
     const NavItem = ({ to, icon, label, badgeCount }: { to: string, icon: React.ReactNode, label: string, badgeCount?: number }) => (
         <Link
             href={to}
-            className={`relative flex flex-col items-center gap-1 flex-1 py-1 transition-all btn-haptic ${isActive(to) ? 'text-[#005d32]' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`relative flex flex-col items-center gap-1 flex-1 py-1 transition-all btn-haptic ${isActive(to) ? 'text-slate-900' : 'text-gray-400 hover:text-gray-600'}`}
         >
             <div className="relative">
                 {icon}
                 {badgeCount !== undefined && badgeCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-white animate-in zoom-in">
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center ring-2 ring-white animate-in zoom-in px-1">
                         {badgeCount}
                     </span>
                 )}
             </div>
-            <span className="text-[9px] font-black uppercase tracking-tighter">{label}</span>
+            <span className="text-[9px] font-bold uppercase tracking-tighter">{label}</span>
             {isActive(to) && (
-                <div className="absolute -bottom-1 w-1 h-1 bg-[#005d32] rounded-full animate-in fade-in slide-in-from-bottom-1" />
+                <div className="absolute -bottom-1 w-1 h-1 bg-primary rounded-full animate-in fade-in slide-in-from-bottom-1" />
             )}
         </Link>
     );
@@ -40,14 +40,14 @@ const BottomNav: React.FC = () => {
             />
             <NavItem
                 to="/shop"
-                label="Explore"
-                icon={<svg className="w-6 h-6" fill={isActive('/shop') ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
+                label="Shop"
+                icon={<svg className="w-6 h-6" fill={isActive('/shop') ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>}
             />
             <NavItem
                 to="/cart"
-                label="Bag"
+                label="Cart"
                 badgeCount={cart.length}
-                icon={<svg className="w-6 h-6" fill={isActive('/cart') ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>}
+                icon={<svg className="w-6 h-6" fill={isActive('/cart') ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>}
             />
             <NavItem
                 to="/account"

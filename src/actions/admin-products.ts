@@ -15,7 +15,16 @@ const productSchema = z.object({
     image: z.string().url("Valid image URL required"),
     features: z.string().optional(),
     colors: z.string().optional(),
+    tags: z.string().optional(),
     type: z.enum(['SIMPLE', 'VARIABLE']).default('SIMPLE'),
+    sku: z.string().optional(),
+    meta_title: z.string().optional(),
+    meta_description: z.string().optional(),
+    slug: z.string().optional(),
+    supplier_id: z.string().optional().nullable(),
+    supplier_price: z.coerce.number().optional().nullable(),
+    supplier_link: z.string().optional().nullable(),
+    shipping_cost: z.coerce.number().optional().nullable(),
     variations: z.string().optional() // JSON string
 });
 
@@ -32,7 +41,15 @@ export async function createProduct(formData: FormData) {
         image: formData.get('image'),
         features: formData.get('features'),
         colors: formData.get('colors'),
+        tags: formData.get('tags'),
         type: formData.get('type') || 'SIMPLE',
+        sku: formData.get('sku'),
+        meta_title: formData.get('meta_title'),
+        meta_description: formData.get('meta_description'),
+        slug: formData.get('slug'),
+        supplier_price: formData.get('supplier_price'),
+        supplier_link: formData.get('supplier_link'),
+        shipping_cost: formData.get('shipping_cost'),
         variations: formData.get('variations')
     };
 
@@ -45,6 +62,7 @@ export async function createProduct(formData: FormData) {
     const { data } = validated;
     const featuresArray = data.features ? data.features.split(',').map(s => s.trim()).filter(Boolean) : [];
     const colorsArray = data.colors ? data.colors.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const tagsArray = data.tags ? data.tags.split(',').map(s => s.trim()).filter(Boolean) : [];
 
     let categoryId = null;
     const { data: cat } = await supabaseAdmin.from('categories').select('id').eq('name', data.category).single();
@@ -58,7 +76,6 @@ export async function createProduct(formData: FormData) {
         if (newCat) categoryId = newCat.id;
     }
 
-    // 1. Insert Product
     const { data: product, error: prodError } = await supabaseAdmin.from('products').insert({
         name: data.name,
         description: data.description,
@@ -70,17 +87,22 @@ export async function createProduct(formData: FormData) {
         category_id: categoryId,
         features: featuresArray,
         colors: colorsArray,
+        tags: tagsArray,
         type: data.type,
+        sku: data.sku,
+        meta_title: data.meta_title,
+        meta_description: data.meta_description,
+        slug: data.slug || data.name.toLowerCase().replace(/ /g, '-'),
+        supplier_price: data.supplier_price || 0,
+        supplier_link: data.supplier_link || null,
+        supplier_id: data.supplier_id || null,
+        shipping_cost: data.shipping_cost || 0,
         rating: 0,
         reviews_count: 0
     }).select().single();
 
-    if (prodError) {
-        console.error("Create Product Error", prodError);
-        return { error: "Failed to create product" };
-    }
+    if (prodError) return { error: "Failed to create product." };
 
-    // 2. Insert Variations if any
     if (data.type === 'VARIABLE' && data.variations) {
         try {
             const variations = JSON.parse(data.variations);
@@ -93,17 +115,11 @@ export async function createProduct(formData: FormData) {
                     attributes: v.attributes,
                     image: v.image || data.image
                 }));
-
-                const { error: varError } = await supabaseAdmin.from('product_variations').insert(variationsToInsert);
-                if (varError) throw varError;
-
-                // Sync total stock
+                await supabaseAdmin.from('product_variations').insert(variationsToInsert);
                 const totalStock = variations.reduce((acc: number, v: any) => acc + (v.stock || 0), 0);
                 await supabaseAdmin.from('products').update({ stock: totalStock }).eq('id', product.id);
             }
-        } catch (e) {
-            console.error("Variations Parsing/Insert Error", e);
-        }
+        } catch (e) { console.error(e); }
     }
 
     revalidatePath('/admin/products');
@@ -111,9 +127,35 @@ export async function createProduct(formData: FormData) {
     return { success: true };
 }
 
+export async function bulkUploadProducts(csvContent: string) {
+    await requireAdmin();
+    // Simple CSV parser for demo purposes
+    const lines = csvContent.split('\n').filter(Boolean);
+    const headers = lines[0].split(',').map(h => h.trim());
+    const products = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim());
+        const prod: any = {};
+        headers.forEach((header, i) => prod[header] = values[i]);
+        return prod;
+    });
+
+    for (const p of products) {
+        const formData = new FormData();
+        formData.append('name', p.name);
+        formData.append('price', p.price);
+        formData.append('stock', p.stock || '0');
+        formData.append('category', p.category || 'Uncategorized');
+        formData.append('image', p.image || 'https://images.unsplash.com/photo-1560343090-f0409e92791a?q=80&w=400&auto=format&fit=crop');
+        formData.append('description', p.description || '');
+        await createProduct(formData);
+    }
+
+    revalidatePath('/admin/products');
+    return { success: true, count: products.length };
+}
+
 export async function updateProduct(id: string, formData: FormData) {
     await requireAdmin();
-
     const raw = {
         name: formData.get('name'),
         description: formData.get('description'),
@@ -124,7 +166,15 @@ export async function updateProduct(id: string, formData: FormData) {
         image: formData.get('image'),
         features: formData.get('features'),
         colors: formData.get('colors'),
+        tags: formData.get('tags'),
         type: formData.get('type') || 'SIMPLE',
+        sku: formData.get('sku'),
+        meta_title: formData.get('meta_title'),
+        meta_description: formData.get('meta_description'),
+        slug: formData.get('slug'),
+        supplier_price: formData.get('supplier_price'),
+        supplier_link: formData.get('supplier_link'),
+        shipping_cost: formData.get('shipping_cost'),
         variations: formData.get('variations')
     };
 
@@ -134,9 +184,9 @@ export async function updateProduct(id: string, formData: FormData) {
     const { data } = validated;
     const featuresArray = data.features ? data.features.split(',').map(s => s.trim()).filter(Boolean) : [];
     const colorsArray = data.colors ? data.colors.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const tagsArray = data.tags ? data.tags.split(',').map(s => s.trim()).filter(Boolean) : [];
 
-    // Update product
-    const { error: prodError } = await supabaseAdmin.from('products').update({
+    await supabaseAdmin.from('products').update({
         name: data.name,
         description: data.description,
         price: data.price,
@@ -146,40 +196,37 @@ export async function updateProduct(id: string, formData: FormData) {
         category_name: data.category,
         features: featuresArray,
         colors: colorsArray,
+        tags: tagsArray,
         type: data.type,
+        sku: data.sku,
+        meta_title: data.meta_title,
+        meta_description: data.meta_description,
+        slug: data.slug,
+        supplier_price: data.supplier_price || 0,
+        supplier_link: data.supplier_link || null,
+        supplier_id: data.supplier_id || null,
+        shipping_cost: data.shipping_cost || 0,
     }).eq('id', id);
 
-    if (prodError) return { error: "Update failed" };
-
-    // Update Variations
     if (data.type === 'VARIABLE' && data.variations) {
         try {
             const variations = JSON.parse(data.variations);
-            // Simple approach: delete existing and re-insert for MVP
             await supabaseAdmin.from('product_variations').delete().eq('product_id', id);
-
             if (variations.length > 0) {
                 const variationsToInsert = variations.map((v: any) => ({
                     product_id: id,
-                    sku: v.sku,
-                    price: v.price,
-                    stock: v.stock,
-                    attributes: v.attributes,
-                    image: v.image || data.image
+                    sku: v.sku, price: v.price, stock: v.stock, attributes: v.attributes, image: v.image || data.image
                 }));
-                const { error: varError } = await supabaseAdmin.from('product_variations').insert(variationsToInsert);
-                if (varError) throw varError;
-
+                await supabaseAdmin.from('product_variations').insert(variationsToInsert);
                 const totalStock = variations.reduce((acc: number, v: any) => acc + (v.stock || 0), 0);
                 await supabaseAdmin.from('products').update({ stock: totalStock }).eq('id', id);
             }
-        } catch (e) {
-            console.error("Variations Update Error", e);
-        }
+        } catch (e) { console.error(e); }
     }
 
     revalidatePath('/admin/products');
     revalidatePath(`/product/${id}`);
+    revalidatePath('/shop');
     return { success: true };
 }
 
@@ -190,4 +237,3 @@ export async function deleteProduct(id: string) {
     revalidatePath('/admin/products');
     return { success: true };
 }
-
