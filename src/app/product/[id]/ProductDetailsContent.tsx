@@ -23,7 +23,7 @@ const ProductDetailsContent: React.FC<ProductDetailsContentProps> = ({ product, 
     const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] || '');
     const [customText, setCustomText] = useState('');
     const [activeImage, setActiveImage] = useState(product?.image);
-    const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'shipping' | 'returns'>('desc');
+    const [activeTab, setActiveTab] = useState<'description' | 'reviews' | 'shipping'>('description');
     const galleryRef = useRef<HTMLDivElement>(null);
 
     const deliveryEstimate = useMemo(() => {
