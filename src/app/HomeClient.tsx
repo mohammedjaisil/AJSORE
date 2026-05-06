@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
@@ -38,6 +38,7 @@ const HomeClient: React.FC<HomeClientProps> = ({ featuredProducts }) => {
     const { formatPrice } = useCartStore();
     useScrollReveal();
 
+    const reviewsRef = useRef<HTMLDivElement>(null);
     const [activeTab, setActiveTab] = useState('Featured');
     const categories = ['Featured', ...Array.from(new Set(featuredProducts.map(p => p.category)))];
     const filteredProducts = activeTab === 'Featured' ? featuredProducts.slice(0, 4) : featuredProducts.filter(p => p.category === activeTab);
